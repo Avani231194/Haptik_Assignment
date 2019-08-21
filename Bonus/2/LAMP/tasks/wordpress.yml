@@ -1,0 +1,6 @@
+---
+- hosts: wordpress
+  become: yes
+  tasks:
+    - name: Run shell script for wordpress
+      script: <Path to script/script.sh> 

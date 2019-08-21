@@ -1,0 +1,29 @@
+---
+- hosts: apache
+  become: yes
+  tasks:
+    - name: install packages
+      apt: name={{ item }} update_cache=yes state=latest
+      with_items:
+          - php5-cli
+          - php5-curl
+          - php5-fpm
+          - php5-intl
+          - php5-json
+          - php5-mcrypt
+          - php5-sqlite
+          - sqlite3
+
+      notify:
+        - restart php5-fpm
+
+    - name: enable php5 mcrypt module
+      shell: php5enmod mcrypt
+      args:
+        creates: /etc/php5/cli/conf.d/20-mcrypt.ini
+
+
+
+  handlers:
+    - name: restart php5-fpm
+      service: name=php5-fpm state=restarted

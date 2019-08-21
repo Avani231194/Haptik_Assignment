@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+
+ServerAdmin admin@testinwordpress.com
+ServerName testingwordpress.com
+ServerAlias www.testingwordpress.com
+DocumentRoot /var/www/html/wordpress
+
+<Directory /var/www/html/wordpress>
+     Options Indexes FollowSymLinks
+     AllowOverride All
+     Require all granted
+</Directory>
+
+ErrorLog ${APACHE_LOG_DIR}/your_domain.com_error.log 
+CustomLog ${APACHE_LOG_DIR}/your_domain.com_access.log combined 
+</VirtualHost>
+

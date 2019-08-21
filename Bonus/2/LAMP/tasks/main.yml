@@ -1,0 +1,10 @@
+---
+
+- name: Install apache2
+  include: apache.yml
+- name: Install php
+  include: php.yml
+- name: Install mysql
+  include: mysql.yml
+- name: Install wordpress
+  include: wordpress.yml

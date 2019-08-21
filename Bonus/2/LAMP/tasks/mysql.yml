@@ -1,0 +1,35 @@
+---
+- hosts: apache
+  become: yes
+  tasks:
+    - name: Install the MySQL packages
+      apt: name={{ item }} state=installed update_cache=yes
+      with_items:
+          - mysql-server-5.6
+          - mysql-client-5.6
+          - python-mysqldb
+          - libmysqlclient-dev
+    - name: Update MySQL root password for all root accounts
+      mysql_user: name=root host={{ item }} password={{ mysql_root_pass }} state=present
+      with_items:
+          - 192.168.33.30
+          - root
+      vars:
+          - mysql_root_pass: root@123
+
+    - name: Copy the root credentials as my.cnf file
+      template: src=/etc/ansible/roles/LAMP/templates/my.cnf dest=/my.cnf mode=0755
+      remote_src: yes
+
+    - name: Ensure Anonymous user(s) are not in the database
+      mysql_user: name='' host={{ item }} state=absent
+      with_items:
+          - root
+    - name: Set password for root login
+      command: mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('password1234') WHERE User='root';";
+      args:
+        warn: false
+      notify: Restart MySQL
+  handlers:
+    - name: Restart MySQL
+      service: name=mysql state=restarted

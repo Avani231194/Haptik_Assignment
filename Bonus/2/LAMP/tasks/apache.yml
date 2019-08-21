@@ -1,0 +1,35 @@
+---
+- hosts: apache
+  become: yes
+  tasks:
+    - name: check package is installed or not
+      command: "dpkg-query -l apache2"
+      register: deb_check
+      ignore_errors: yes
+    - name: installing
+      apt: name={{ item }} state=present update_cache=yes state=latest
+      with_items:
+          - apache2
+          - apache2-utils
+      when: deb_check.stdout.find('no packages found matching apache2') != 1
+
+    - name: start_apache2
+      service: name=apache2 state=started
+
+    - name: Remove the default file in apache config
+      file: path=/etc/apache2/sites-enabled/default state=absent
+
+    - name: Copy Apache config file
+      template: src=/etc/ansible/roles/LAMP/templates/apache2.conf.j2 dest=/etc/apache2/sites-available/apache.com.conf
+
+    - name: enable site
+      file: src=/etc/apache2/sites-available/apache.com.conf dest=/etc/apache2/sites-enabled/apache.com.conf state=link
+
+    - name: copy files to be hosted
+      path: /var/www/html state=directory
+      template: src=/etc/ansible/roles/LAMP/templates/index.html.j2 dest=/var/www/html/index.html
+      notify: restart_apache2
+
+  handlers:
+    - name: restart_apache2
+      service: name=apache2 state=restarted
